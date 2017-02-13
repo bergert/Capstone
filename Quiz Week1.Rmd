@@ -1,0 +1,74 @@
+---
+title: "Quiz Week1"
+author: "Thomas Berger"
+date: "February 13, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+   filePath <- file.path(getwd(),"final","en_US")
+   list.files(filePath)
+
+   # loading data
+   blogFile <- file.path(filePath,"en_US.blogs.txt")
+   newsFile <- file.path(filePath,"en_US.news.txt")
+   twitterFile <- file.path(filePath,"en_US.twitter.txt")
+   
+   # function to read all lines of a file
+   getLines <- function(f) {
+      con <- file(f,open="r")
+      lines <- readLines(con)
+      close(con)
+      lines
+   }
+   blogData <- getLines(blogFile)
+   newsData <- getLines(newsFile)
+   twitterData <- getLines(twitterFile)
+```
+
+## Q1 size of en_US.blogs.txt
+
+```{r}
+   size <- (file.info(blogFile)$size) / 1024 / 1024
+   round(size,0)
+```
+
+## Q2 en_US.twitter.txt number of text lines
+
+```{r}
+   length(twitterData)
+```
+
+## Q3 lonest line
+
+```{r}
+   details <- data.frame(file=list.files(filePath),
+                         max_chars=c(max(unlist(lapply(blogData, nchar))),
+                             max(unlist(lapply(newsData, nchar))),
+                             max(unlist(lapply(twitterData, nchar))) )
+                         )
+   details
+```
+
+## Q4 in the twitter dataset divide words(love/hate)
+
+```{r}
+   round (length(grep("love", twitterData)) / length(grep("hate", twitterData)),0)
+```
+
+## Q5 the biostats text says what ?
+
+```{r}
+   twitterData[grep("biostats", twitterData)]
+```
+
+## Q6
+
+```{r}
+   length(grep("A computer once beat me at chess, but it was no match for me at kickboxing", twitterData))
+```
+
