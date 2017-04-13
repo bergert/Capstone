@@ -1,7 +1,7 @@
 ---
-title: "Week1"
+title: "Week2"
 author: "Thomas Berger"
-date: "February 13, 2017"
+date: "April 13, 2017"
 output: html_document
 ---
 
@@ -96,14 +96,41 @@ See the ?connections help page for more information.
 ## Cleaning the data
 
 ```{r}
- set.seed(1233)
- library(tm)
- SampleData <-paste(sample(blogData, 3000, replace=FALSE), 
-                   sample(newsData, 3000, replace=FALSE), 
-                   sample(twitterData, 3000, replace=FALSE))
+
+split_sentences <- function (text) {
+  # split based on periods, exclamation or question marks
+  # ignore dots in case of a.m. or p.m.
+  # map \\n to new lines, and also <space>\<double-quote>
+  result <- unlist(strsplit (text, split = "((\\\")|[!?]|(\\n))|(\\.[^0-9m])"))
+
+  # remaove spaces at start and end
+  result <- lapply(result, function(x) gsub("^\\s+|\\s+$","",x))
+  
+  # remove empty lines
+  result <- result [nchar (result) > 0]
+
+  # always return something
+  if (length (result) == 0)
+      result <- ""
+
+  return (result)
+}
+
+   # testing the split into sentences
+   # text <- 'Colin Murphy. \"Boxing was resumed! why? To clear 4.20 at 5 p.m. Nice job'
+   # strsplit (text, split = "[[\\.!?\n][\\\"]]+")
+
+   set.seed(1234)
+   library(tm)
+   # get a sample of 3000 lines lines
+   SampleData <-paste(sample(blogData, 3000, replace=FALSE), 
+                      sample(newsData, 3000, replace=FALSE), 
+                      sample(twitterData, 3000, replace=FALSE))
  
-   SampleData <- blogData[[3]]
-   # create the corpus 
+   # split sample data into sentences
+   SampleData <- split_sentences(SampleData)
+
+   # create the sample corpus 
    sample_corp<-Corpus(VectorSource(SampleData), readerControl=list(language="lat"))
    # perform cleaning operations
    sample_corp<-tm_map(sample_corp, PlainTextDocument)
@@ -116,22 +143,20 @@ See the ?connections help page for more information.
    sample_corp<-tm_map(sample_corp, removeWords, stopwords("english"))
    sample_corp<-tm_map(sample_corp, removeWords, swearData)
 
-   corp_clean<-Corpus(VectorSource(corp_clean))
-   # generate a document term matrix
-   dtm<-DocumentTermMatrix(corp_clean)
-
-# Note to self: the sentences are not split; as a result the word detection is
-# accross sentence boundaries - which NEEDS FIXING
-    
 ```
 
+## Create the N-gram
+
+```{r}
+```
 
 ## References
 
-*[https://www.jstatsoft.org/article/view/v025i05 Text minin infrastructure in R]
-*[http://cran.r-project.org/web/views/NaturalLanguageProcessing.html CRAN: Natural Language Processing]
-*[https://www.coursera.org/learn/nlp Stanford Natural Language Processing MOOC]
-*[https://en.wikipedia.org/wiki/N-gram Wikipedia what is a n-gram]
-*[https://cran.r-project.org/web/packages/ngram/vignettes/ngram-guide.pdf R n-gram guide]
-*[http://www.bannedwordlist.com profanity word list (not used, because too short)]
-*[https://www.freewebheaders.com/full-list-of-bad-words-banned-by-google/ bad word list]
+* [how to trim whitespaces](http://stackoverflow.com/questions/2261079/how-to-trim-leading-and-trailing-whitespace-in-r)
+* [Text mining infrastructure in R](https://www.jstatsoft.org/article/view/v025i05)
+* [CRAN: Natural Language Processing](http://cran.r-project.org/web/views/NaturalLanguageProcessing.html)
+* [Stanford Natural Language Processing MOOC](https://www.coursera.org/learn/nlp)
+* [Wikipedia what is a n-gram](https://en.wikipedia.org/wiki/N-gram)
+* [R n-gram guide](https://cran.r-project.org/web/packages/ngram/vignettes/ngram-guide.pdf)
+* [profanity word list (not used, because too short)](http://www.bannedwordlist.com)
+* [bad word list of reasonable size](https://www.freewebheaders.com/full-list-of-bad-words-banned-by-google/)
